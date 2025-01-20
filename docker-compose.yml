@@ -1,0 +1,91 @@
+version: '3'
+
+services:
+  eureka-server:
+    build: eureka-server
+    mem_limit: 512m
+    ports:
+      - "8761:8761"
+    networks:
+      - 'product-cart-sale-network'
+  product-service:
+    build: product-service
+    mem_limit: 512m
+    ports:
+      - "9091:9091"
+    environment:
+      DB_URL: jdbc:mysql://product_serv:3306/cloudintegrador_products?createDataBaseIfNotExist=true&serverTimezone=UTC
+      DB_USER_NAME: root
+      DB_PASSWORD: 
+    restart: always
+    depends_on:
+      product_serv:
+          condition: service_healthy
+  product_serv:
+    image: mysql:8.0.33
+    ports: 
+      - "3307:3306" 
+    environment:
+      MYSQL_ROOT_PASSWORD: 1234
+      MYSQL_PASSWORD: 1234
+      MYSQL_DATABASE: product-service
+    restart: always
+    healthcheck:
+      test: ["CMD","mysqladmin","ping","-h","localhost"]
+      timeout: 10s
+      retries: 10   
+  shopping_cart-service:
+    build: shopping_cart-service
+    mem_limit: 512m
+    ports:
+      - "9180:9180"
+    environment:
+      DB_URL: jdbc:mysql://cart_serv:3306/cloudintegrador_shopping_cart?createDataBaseIfNotExist=true&serverTimezone=UTC
+      DB_USER_NAME: root
+      DB_PASSWORD: 
+    restart: always
+    depends_on:
+      cart_serv:
+          condition: service_healthy
+  cart_serv:
+    image: mysql:8.0.33
+    ports: 
+      - "3305:3304" 
+    environment:
+      MYSQL_ROOT_PASSWORD: 1234
+      MYSQL_PASSWORD: 1234
+      MYSQL_DATABASE: shopping_cart-service
+    restart: always
+    healthcheck:
+      test: ["CMD","mysqladmin","ping","-h","localhost"]
+      timeout: 10s
+      retries: 10 
+  sales-service:
+    build: sales-service
+    mem_limit: 512m
+    ports:
+      - "9980:9980"
+    environment:
+      DB_URL: jdbc:mysql://sale_serv:3306/cloudintegrador_sales?createDataBaseIfNotExist=true&serverTimezone=UTC
+      DB_USER_NAME: root
+      DB_PASSWORD: 
+    restart: always
+    depends_on:
+      sale_serv:
+          condition: service_healthy
+  sale_serv:
+    image: mysql:8.0.33
+    ports: 
+      - "3303:3302" 
+    environment:
+      MYSQL_ROOT_PASSWORD: 1234
+      MYSQL_PASSWORD: 1234
+      MYSQL_DATABASE: sales-service
+    restart: always
+    healthcheck:
+      test: ["CMD","mysqladmin","ping","-h","localhost"]
+      timeout: 10s
+      retries: 10
+       
+networks: 
+  product-cart-sale-network:
