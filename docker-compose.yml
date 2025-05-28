@@ -6,8 +6,11 @@ services:
     mem_limit: 512m
     ports:
       - "8761:8761"
-    networks:
-      - 'product-cart-sale-network'
+  api-gateway:
+    build: api-gateway
+    mem_limit: 512m
+    ports:
+      - "443:443"
   product-service:
     build: product-service
     mem_limit: 512m
@@ -86,6 +89,3 @@ services:
       test: ["CMD","mysqladmin","ping","-h","localhost"]
       timeout: 10s
       retries: 10
-       
-networks: 
-  product-cart-sale-network:
